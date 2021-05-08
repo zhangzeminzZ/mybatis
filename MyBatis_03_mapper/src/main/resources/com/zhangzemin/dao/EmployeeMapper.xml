@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+namespace:名称空间，指定为接口的全类名
+id：唯一标识
+resultType：返回值类型
+#{id}：从传递过来的参数中取出id值
+ -->
+<mapper namespace="com.zhangzemin.dao.EmployeeMapper">
+	<!--Employee getEmpById(Integer id);-->
+	<select id="getEmpById" resultType="com.zhangzemin.bean.Employee"
+			databaseId="mysql">
+		select * from tbl_employee where id = #{id}
+	</select>
+
+	<select id="getEmpById" resultType="com.zhangzemin.bean.Employee"
+			databaseId="oracle">
+		select ID,LAST_NAME	lastName,EMAIL email,GENDER
+		from employees where ID=#{id}
+	</select>
+
+	<!--Employee getEmpByIdAndLastName(@Param("id")Integer id,@Param("lastName")String lastName);-->
+	<select id="getEmpByIdAndLastName" resultType="com.zhangzemin.bean.Employee">
+		select * from tbl_employee where id = #{id} and last_name = #{lastName}
+	</select>
+
+	<!--Employee getEmpByMap(Map<String, Object> map);-->
+	<select id="getEmpByMap" resultType="com.zhangzemin.bean.Employee">
+		select * from ${tableName} where id = #{id} and last_name = #{lastName}
+	</select>
+
+	<!--Employee getEmpByPojo(Employee employee);-->
+	<select id="getEmpByPojo" resultType="com.zhangzemin.bean.Employee">
+		select * from tbl_employee where id = #{id} and last_name = #{lastName}
+	</select>
+
+	<!--List<Employee> getEmpsByLastNameLike(String lastName);-->
+	<select id="getEmpsByLastNameLike" resultType="com.zhangzemin.bean.Employee">
+		select * from tbl_employee where last_name like #{lastName}
+	</select>
+
+	<!--Map<String, Object> getEmpByIdReturnMap(Integer id);-->
+	<select id="getEmpByIdReturnMap" resultType="map">
+		select * from tbl_employee where id = #{id}
+	</select>
+
+	<!--Map<String, Employee> getEmpByLastNameLikeReturnMap(String lastName);-->
+	<select id="getEmpByLastNameLikeReturnMap" resultType="com.zhangzemin.bean.Employee">
+		select * from tbl_employee where last_name like #{lastName}
+	</select>
+
+
+	<!--void addEmp(Employee employee);-->
+	<!-- parameterType：参数类型，可以省略，
+	获取自增主键的值：
+		mysql支持自增主键，自增主键值的获取，mybatis也是利用statement.getGenreatedKeys()；
+		useGeneratedKeys="true"；使用自增主键获取主键值策略
+		keyProperty；指定对应的主键属性，也就是mybatis获取到主键值以后，将这个值封装给javaBean的哪个属性
+	-->
+	<insert id="addEmp" useGeneratedKeys="true" keyProperty="id" databaseId="mysql">
+		insert into tbl_employee (last_name,gender,email) values (#{lastName},#{gender},#{email});
+	</insert>
+
+	<!--
+	获取非自增主键的值：
+		Oracle不支持自增；Oracle使用序列来模拟自增；
+		每次插入的数据的主键是从序列中拿到的值
+	 -->
+	<insert id="addEmp" databaseId="oracle">
+		<!--
+		keyProperty:查出的主键值封装给javaBean的哪个属性
+		order="BEFORE":当前sql在插入sql之前运行
+			   AFTER：当前sql在插入sql之后运行
+		resultType:查出的数据的返回值类型
+
+		BEFORE运行顺序：
+			先运行selectKey查询id的sql；查出id值封装给javaBean的id属性
+			在运行插入的sql；就可以取出id属性对应的值
+		AFTER运行顺序：
+			先运行插入的sql（从序列中取出新值作为id）；
+			再运行selectKey查询id的sql；
+		 -->
+		<selectKey keyProperty="id" order="BEFORE" resultType="Integer">
+			<!-- 编写查询主键的sql语句 -->
+			<!-- BEFORE-->
+			select EMPLOYEES_SEQUENCE.nextval from dual
+			<!-- AFTER：
+			 select EMPLOYEES_SEQUENCE.currval from dual -->
+		</selectKey>
+
+		<!-- 插入时的主键是从序列中拿到的 -->
+		<!-- BEFORE:-->
+		insert into employees(ID,LAST_NAME,EMAIL,GENDER)
+		values(#{id},#{lastName},#{email<!-- ,jdbcType=NULL -->},#{gender})
+		<!-- AFTER：
+		insert into employees(ID,LAST_NAME,EMAIL)
+		values(employees_sequence.nextval,#{lastName},#{email}) -->
+	</insert>
+
+	<!--boolean updateEmp(Employee employee);-->
+	<update id="updateEmp">
+		update tbl_employee
+			set last_name = #{lastName},gender=#{gender},email=#{email} where id=#{id}
+	</update>
+
+	<!--void deleteEmpById(Integer id);-->
+	<delete id="deleteEmpById">
+		delete from tbl_employee where id=#{id}
+	</delete>
+</mapper>

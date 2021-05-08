@@ -10,7 +10,13 @@ resultType：返回值类型
 #{id}：从传递过来的参数中取出id值
 public Employee getEmpById(Integer id);
  -->
-	<select id="getEmpById" resultType="com.zhangzemin.bean.Employee">
-		select id,last_name lastName,email,gender from tbl_employee where id = #{id}
+	<select id="getEmpById" resultType="com.zhangzemin.bean.Employee"
+			databaseId="mysql">
+		select * from tbl_employee where id = #{id}
+	</select>
+	<select id="getEmpById" resultType="com.zhangzemin.bean.Employee"
+			databaseId="oracle">
+		select ID,LAST_NAME	lastName,EMAIL email,GENDER
+		from employees where ID=#{id}
 	</select>
 </mapper>

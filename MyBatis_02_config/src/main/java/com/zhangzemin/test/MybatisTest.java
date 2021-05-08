@@ -2,6 +2,7 @@ package com.zhangzemin.test;
 
 import com.zhangzemin.bean.Employee;
 import com.zhangzemin.dao.EmployeeMapper;
+import com.zhangzemin.dao.EmployeeMapperAnnotation;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -75,6 +76,20 @@ public class MybatisTest {
             System.out.println(mapper.getClass());
             System.out.println(employee);
         }finally {
+            openSession.close();
+        }
+    }
+
+
+    @Test
+    public void test03() throws IOException{
+        SqlSessionFactory sqlSessionFactory = getSqlSessionFactory();
+        SqlSession openSession = sqlSessionFactory.openSession();
+        try{
+            EmployeeMapperAnnotation mapper = openSession.getMapper(EmployeeMapperAnnotation.class);
+            Employee empById = mapper.getEmpById(1);
+            System.out.println(empById);
+        }finally{
             openSession.close();
         }
     }
